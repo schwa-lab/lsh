@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#a!/usr/bin/env python3
 from .model import LSHItem
 from bitstring import BitArray
 
@@ -27,7 +27,14 @@ class BinaryReader:
         pass
 
 
-    def process_
+    def process_file(self, filelike):
+        while True:
+            id, sig = filelike.read(4), filelike.read(16)
+            if not len(id) or not len(sig):
+                break
+            else:
+                yield LSHItem(int(id), BitArray(sig))
+
 
 
 if __name__ == '__main__':
