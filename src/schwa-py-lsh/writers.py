@@ -5,7 +5,7 @@ Write a human-readable format for a bit representation
 """
 
 import sys
-from human_reader import LSHReader
+from .readers import LSHReader
 
 class LSHWriter(object):
     def __init__(self):

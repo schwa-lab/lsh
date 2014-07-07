@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from model import LSHItem
+from .model import LSHItem
 from bitstring import BitArray
 
 class LSHReader(object):

@@ -42,14 +42,14 @@ class KNNQuery(object):
 
     def find_neighbours(self, query_item, k):
         candidates = defaultdict(int)
-        for perm in xrange(self.perms):
+        for perm in self.perms:
             reps = []
             for item in self.items:
                 rep = ''
                 for bit_index in perm:
                     rep += str(item.signature[bit_index])
                 reps.append((rep, item))
-            reps.sort()
+            reps.sort(key=lambda x: x[0])
             idx = self.find_query_item(reps, query_item)
             lower = idx - self.window
             if lower < 0:
@@ -85,11 +85,12 @@ class KNNQuery(object):
         self.perms = []
         ints = list(range(sig_length))
         for perm in range(perm_num):
-            self.perms.append(random.shuffle(ints)[:perm_length])
+            random.shuffle(ints)
+            self.perms.append(ints[:perm_length])
 
 
 if __name__ == '__main__':
-    TESTFILE = './io/test/test_data_1000.txt'
+    TESTFILE = './schwa-py-lsh/test/test_data_1000.txt'
     q = KNNQuery(perm_num=2, perm_length=10, sig_length=100, window_size=5)
     q.add_items_to_index(open(TESTFILE, 'r'))
     for item in q.items:
