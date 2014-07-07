@@ -19,6 +19,7 @@ class LSHReader(object):
         item = LSHItem(id, b_signature)
         return item
 
+
 if __name__ == '__main__':
     r = LSHReader()
     import sys
