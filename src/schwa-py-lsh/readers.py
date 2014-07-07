@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from model import LSHItem
+from .model import LSHItem
 from bitstring import BitArray
 
 class LSHReader(object):
@@ -18,6 +18,7 @@ class LSHReader(object):
         b_signature = BitArray('0b' + signature)
         item = LSHItem(id, b_signature)
         return item
+
 
 if __name__ == '__main__':
     r = LSHReader()
