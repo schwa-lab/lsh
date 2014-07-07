@@ -79,7 +79,7 @@ class KNNQuery(object):
 
     def add_items_to_index(self, filelike):
         r = LSHReader()
-        for item in r.process_document(filelike):
+        for item in r.process_file(filelike):
             self.add_item_to_index(item)
 
 
@@ -97,9 +97,9 @@ class KNNQuery(object):
 
 if __name__ == '__main__':
     TESTFILE = './schwa-py-lsh/test/test_data_1000.txt'
-    q = KNNQuery(perm_num=10, perm_length=10, sig_length=100, window_size=5)
+    q = KNNQuery(perm_num=10, perm_length=5, sig_length=100, window_size=10)
     q.add_items_to_index(open(TESTFILE, 'r'))
     for item in q.items:
         print(str(item))
-        print('\n'.join(str(n) for n in q.find_neighbours(item, 2)))
+        print('\n'.join(str(n) for n in q.find_neighbours(item, 10)))
         print()
