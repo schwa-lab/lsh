@@ -14,5 +14,10 @@ class LSHItem(object):
     def __str__(self):
         return '{} {}'.format(self.id, self.signature)
 
+    
+    def __repr__(self):
+        return str(self)
+
+
     def __hash__(self):
         return hash(self.id)

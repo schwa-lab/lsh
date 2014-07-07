@@ -20,7 +20,7 @@ class LSHWriter(object):
 
 def main(filename):
     r = LSHReader()
-    items = r.process_document(open(filename))
+    items = r.process_file(open(filename))
     w = LSHWriter()
     for id, sig in w.process_items(items):
         print(id,sig)

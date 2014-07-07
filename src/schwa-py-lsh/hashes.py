@@ -11,35 +11,35 @@ class Projection:
 
     def hash(self, v):
         h = numpy.dot(self.vectors, v)
-        h = [1 if x > 0 else 0 for x in h]
+        h = [x > 0 for x in h]
         return BitArray(h)
 
 
 
 def main(n_vecs):
    generator = TestVectorGenerator()
-   proj = Projection(100,1000)
+   proj = Projection(100, 1000)
    for n in range(n_vecs):
-       id,vec = generator.get()
+       id, vec = generator.get()
        signature = proj.hash(vec)
-       print(id,vec)
+       print(id, vec)
        print(signature.bin)
 
-def test(n_vecs):
+def test_random_vecs(n_vecs):
    generator = TestVectorGenerator()
    for n in range(n_vecs):
-       id,vec = generator.get()
-       proj = Projection(100,1000)
+       id, vec = generator.get()
+       proj = Projection(100, 1000)
        signature = proj.hash(vec)
-       print(id,vec)
+       print(id, vec)
        print(signature.bin)
        # Change half the bits
        for i in range(500):
            vec[i] = 1
        signature2 = proj.hash(vec)
        print(signature2.bin)
-       print(signature==signature2)
-       print(len((signature^signature2).bin.replace('0','')))
+       print(signature == signature2)
+       print(len((signature ^ signature2).bin.replace('0', '')))
 
 
 if __name__ == '__main__':
