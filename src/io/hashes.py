@@ -14,7 +14,18 @@ class Projection:
         h = [1 if x > 0 else 0 for x in h]
         return BitArray(h)
 
+
+
 def main(n_vecs):
+   generator = TestVectorGenerator()
+   proj = Projection(100,1000)
+   for n in range(n_vecs):
+       id,vec = generator.get()
+       signature = proj.hash(vec)
+       print(id,vec)
+       print(signature.bin)
+
+def test(n_vecs):
    generator = TestVectorGenerator()
    for n in range(n_vecs):
        id,vec = generator.get()
@@ -22,6 +33,7 @@ def main(n_vecs):
        signature = proj.hash(vec)
        print(id,vec)
        print(signature.bin)
+       # Change half the bits
        for i in range(500):
            vec[i] = 1
        signature2 = proj.hash(vec)
