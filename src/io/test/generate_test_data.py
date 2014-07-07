@@ -12,7 +12,7 @@ import random
 
 def main(n):
     for i in range(n):
-        print(i * 100, "{0:b}".format(random.getrandbits(128)))
+        print(i * 100, "{0:b}".format(random.getrandbits(128)).zfill(128))
 
 if __name__ == '__main__':
     main(int(sys.argv[1]))
