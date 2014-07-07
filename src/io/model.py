@@ -13,3 +13,6 @@ class LSHItem(object):
 
     def __str__(self):
         return '{} {}'.format(self.id, self.signature)
+
+    def __hash__(self):
+        return hash(self.id)
