@@ -2,11 +2,13 @@
 from .model import LSHItem
 from bitstring import BitArray
 
-class LSHReader(object):
+
+
+class LSHReader:
     def __init__(self):
         pass
 
-    def process_document(self, filelike):
+    def process_file(self, filelike):
         for line in filelike:
             yield self.process_line(line.strip())
 
@@ -18,6 +20,14 @@ class LSHReader(object):
         b_signature = BitArray('0b' + signature)
         item = LSHItem(id, b_signature)
         return item
+
+
+class BinaryReader:
+    def __init__(self):
+        pass
+
+
+    def process_
 
 
 if __name__ == '__main__':
