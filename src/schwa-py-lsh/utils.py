@@ -31,8 +31,9 @@ def json_to_vectors(filelike):
         for word, count in bow.items():
             if not word: # remove empty strings, again
                 continue
-        vectors.append(vec)
+        vectors.append((id, vec))
 
     return vectors
 
 
+#def vectors_to_items(vectors):

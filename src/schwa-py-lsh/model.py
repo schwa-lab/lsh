@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import struct
 
 class LSHItem(object):
     def __init__(self, id, signature, count=0, vector=None):
