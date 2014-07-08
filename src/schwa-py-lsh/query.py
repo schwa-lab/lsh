@@ -31,8 +31,6 @@ def binary_search(seq, target):
         else:
             return m
 
-
-
 class KNNQuery(object):
     def __init__(self, perm_num, perm_length, sig_length, window_size):
         self.generate_perms(perm_num, perm_length, sig_length)
@@ -46,9 +44,11 @@ class KNNQuery(object):
             reps = []
             query = None
             for item in self.items:
-                rep = ''
-                for bit_index in perm:
-                    rep += str(int(item.signature[bit_index]))
+                #rep = ''
+                #for bit_index in perm:
+                #    rep += str(int(item.signature[bit_index]))
+                item.signature.ror(perm)
+                rep = item.signature.bin
                 reps.append((rep, item))
                 if item.id == query_item.id:
                     query = rep
@@ -88,12 +88,10 @@ class KNNQuery(object):
 
 
     def generate_perms(self, perm_num, perm_length, sig_length):
-        self.perms = []
-        ints = list(range(sig_length))
-        for perm in range(perm_num):
-            random.shuffle(ints)
-            self.perms.append(ints[:perm_length])
-
+        ints = list(range(sig_length - perm_length))
+        random.shuffle(ints)
+        self.perms = ints[:perm_num]
+        self.perm_length = perm_length
 
 if __name__ == '__main__':
     TESTFILE = './schwa-py-lsh/test/test_data_1000.txt'
