@@ -41,6 +41,7 @@ def test_random_vecs(n_vecs):
        print(signature == signature2)
        print(len((signature ^ signature2).bin.replace('0', '')))
 
+
 import json
 def test_json():
     BITS = 128
