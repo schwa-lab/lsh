@@ -11,7 +11,7 @@ setup(
     version = VERSION,
     description = 'lsh',
     url = 'https://github.com/schwa-lab/lsh',
-    packages = ['src'],
+    packages = ['lsh'],
     install_requires = [
     ],
 )
