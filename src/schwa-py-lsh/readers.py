@@ -1,5 +1,5 @@
 #a!/usr/bin/env python3
-from model import LSHItem
+from .model import LSHItem
 from bitstring import BitArray
 import pyximport; pyximport.install()
 import bits
@@ -20,11 +20,9 @@ class LSHReader:
         assert len(line) == 2, '{} does not match expected format of space limited line'.format(line)
         id, signature = line
         id = int(id)
-        print(signature)
         b_signature = BitArray('0b' + signature)
         n = 32
         splits = [b_signature[i:i+n].uint for i in range(0,len(b_signature),n)]
-        print(splits)
         signature = bits.Hash(splits)
         
         item = LSHItem(id, b_signature)
