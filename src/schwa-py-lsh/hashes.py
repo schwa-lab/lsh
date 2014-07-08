@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import numpy, sys
 from bitstring import BitArray
-from test.generate_test_vectors import TestVectorGenerator
+#from test.generate_test_vectors import TestVectorGenerator
 
 class Projection:
     def __init__(self, n_bits, n_feats):

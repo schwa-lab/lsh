@@ -54,7 +54,7 @@ class KNNQuery(object):
                     query = rep
             reps.sort(key=lambda x: x[0])
             idx = self.find_query_item(reps, query)
-            print(idx)
+            #print(idx)
             lower = idx - self.window_size
             if lower < 0:
                 lower = 0
@@ -67,13 +67,13 @@ class KNNQuery(object):
     def add_candidates(self, reps, candidates, query_item):
         for rep, item in reps:
             if item.id != query_item.id:
-                print((rep, item))
+                #print((rep, item))
                 candidates[item] += 1
         
 
-    def find_query_item(self, reps, query_item):
-        idx = binary_search(reps, query_item)
-        assert idx != -1, "Could not find index of {} in permutation".format(query_item)
+    def find_query_item(self, reps, query):
+        idx = binary_search(reps, query)
+        assert idx != -1, "Could not find index of {} in permutation".format(query)
         return idx
 
 
