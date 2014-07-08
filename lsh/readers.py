@@ -2,7 +2,7 @@
 from .model import LSHItem
 from bitstring import BitArray
 import pyximport; pyximport.install()
-import bits
+from lsh import bits
 import random
 
 
