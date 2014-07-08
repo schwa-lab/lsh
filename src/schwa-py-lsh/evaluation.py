@@ -12,7 +12,7 @@ from .query import KNNQuery
 
 
 def proportion_correct(neighbours, candidates):
-    print('neighbours:{}\tcandidates:{}'.format(neighbours, candidates))
+    #print('neighbours:{}\tcandidates:{}'.format(neighbours, candidates))
     intersection = set(n[0] for n in neighbours).intersection(set(c[0].id for c in candidates))
     return float(len(intersection))/(len(neighbours))
         
@@ -23,16 +23,19 @@ def run_queries(args, items):
     k = KNNQuery(args.permutations, args.permutation_length, args.bits, args.window_size)
     for item in items.values(): 
         k.add_item_to_index(item)
+    for item in items.values(): 
         queries[item.id] = k.find_neighbours(item, args.k_nearest_neighbours)
     stop = datetime.now()
     print('Running queries took {}'.format(stop - start))
     return queries
 
-
+from .readers import LSHReader
 def main(args):
     print('json:{}'.format(args.json))
     start = datetime.now()
-    items = list(json_to_items(open(args.json),args.bits))
+    #items = list(json_to_items(open(args.json),args.bits))
+    r = LSHReader()
+    items = list(r.process_file(open(args.json)))
     stop = datetime.now()
     print('Generating hashes took: {}'.format(stop - start))
     items = dict((item.id, item) for item in items)
