@@ -66,6 +66,17 @@ class KNNQuery(object):
         return sorted_candidates[:k]
 
 
+    def find_candidates(self, item_reps, query_reps):
+        candidates = set()
+        size = 2 * self.window_size + 1
+        for bucket_rep in reversed(query_reps):
+            if len(candidates) >= size:
+                return list(candidates)[:size]
+            else:
+                candidates |= item_reps[bucket_rep]
+        return list(candidates)
+
+
     def add_candidates(self, reps, candidates, query_item):
         for rep, item in reps:
             if item.id != query_item.id:
