@@ -6,7 +6,7 @@ from collections import defaultdict
 
 def main(filename):
     pairs = defaultdict(list)
-    for line in open('cosine.txt'):
+    for line in open(filename):
         id1, id2, cosine = line.strip().split(' ')
         cosine = float(cosine)
         pairs[id1].append((id2, cosine))

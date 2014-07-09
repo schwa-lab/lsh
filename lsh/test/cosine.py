@@ -3,7 +3,7 @@
 import json
 import sys
 import math
-from utils import json_to_vectors
+from lsh.utils import json_to_vectors
 
 def cosine(bow1, bow2):
     words = set(bow1).intersection(bow2)
@@ -16,7 +16,7 @@ def cosine(bow1, bow2):
 
 def main(filename):
     docs = []
-    for id, name, bow in json.load(open('test/wiki_data.json')):
+    for id, name, bow in json.load(open(filename)):
         try:
             del bow['']
         except KeyError:
