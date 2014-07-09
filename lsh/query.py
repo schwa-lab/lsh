@@ -88,10 +88,20 @@ class KNNQuery(object):
 
 
     def generate_perms(self, perm_num, perm_length, sig_length):
-        ints = list(range(sig_length - perm_length))
-        random.shuffle(ints)
-        self.perms = ints[:perm_num]
         self.perm_length = perm_length
+        self.perms = []
+        ints = list(range(sig_length))
+        random.shuffle(ints)
+        total_rot = 0
+        for r in ints:
+            if not total_rot + r % sig_length:
+                continue
+            total_rot += r
+            self.perms.append(r)
+            if len(self.perms) == perm_length:
+                break
+
+        
 
 if __name__ == '__main__':
     TESTFILE = './schwa-py-lsh/test/test_data_1000.txt'
