@@ -2,6 +2,7 @@
 
 import random
 
+from copy import deepcopy
 from operator import itemgetter
 from collections import defaultdict
 
@@ -23,6 +24,7 @@ class KNNQuery(object):
         self.generate_perms(perm_num, perm_length, sig_length)
         self.window_size = window_size
         self.items = []
+        self.sig_length = sig_length
         self.n_hashes = n_hashes
         self.prefix_length = prefix_length
 
@@ -38,7 +40,8 @@ class KNNQuery(object):
                     #    rep += str(int(item.signature[bit_index]))
                     h = item.signature.hashes[i]
                     h.lrotate(perm)
-                    prefix = h.get_prefix(self.prefix_length)
+                    prefix = deepcopy(h.get_data())
+                    prefix = prefix >> (self.sig_length - self.prefix_length)
                     buckets[prefix].append(item)
                     if item.id == query_item.id:
                         query_prefix = prefix
