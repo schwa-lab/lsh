@@ -37,14 +37,15 @@ def json_to_vectors(filelike):
 
 def vectors_to_items(vectors, bits):
     vectors = list(vectors)
-    n_proj = int(bits/64)
+    n_proj = bits//64
     proj = []
     for i in range(n_proj):
-        proj.append(Projection(bits/64, len(vectors[0][1])))
+        proj.append(Projection(bits, len(vectors[0][1])))
     for id, v in vectors:
         h = Hashes()
         for p in proj:
             h.append(p.hash(v))
+        print(v, [x.get_data() for x in h.hashes])
         yield LSHItem(id, h, vector = v)
 
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 class LSHItem(object):
+    __slots__ = ('id', 'signature', 'count', 'vector')
     def __init__(self, id, signature, count=0, vector=None):
         self.id = id
         self.signature = signature

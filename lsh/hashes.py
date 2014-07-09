@@ -14,12 +14,15 @@ class Projection:
     def hash(self, v):
         h = numpy.dot(self.vectors, v)
         h = ''.join('1' if x > 0 else '0' for x in h)
-        return int(h,2)
+        return int(h[:64],2)
 
 class Hashes:
-    def __init__(self):
+    def __init__(self,sig=False):
         self.hashes = []
-        #for x in [sig[i:i+64] for i in range(0, len(sig), 64)]:
+        if sig:
+            for x in [sig[i:i+64] for i in range(0, len(sig), 64)]:
+                self.append(int(x,2))
+           
     def append(self, x):
          self.hashes.append(bits.Hash(x))
 

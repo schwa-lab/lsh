@@ -12,10 +12,11 @@ from lsh.query import KNNQuery
 import cProfile, pstats, io
 
 
-def proportion_correct(neighbours, candidates):
-    #print('neighbours:{}\tcandidates:{}'.format(neighbours, candidates))
-    intersection = set(n[0] for n in neighbours).intersection(set(c[0].id for c in candidates))
-    return float(len(intersection))/(len(neighbours))
+def proportion_correct(neighbours, candidates, k):
+    print('neighbours:{}\tcandidates:{}'.format(neighbours, [x.get_data() for x in candidates[0][0].signature.hashes]))
+    print()
+    intersection = set(n[0] for n in neighbours[:k]).intersection(set(c[0].id for c in candidates[:k]))
+    return len(intersection)/k
         
 
 def run_queries(args, items):
@@ -41,9 +42,11 @@ from lsh.readers import LSHReader
 def main(args):
     print('json:{}'.format(args.json))
     start = datetime.now()
-    items = list(json_to_items(open(args.json),args.bits))
-    #r = LSHReader()
-    #items = list(r.process_file(open(args.json)))
+    if args.no_json:
+        r = LSHReader()
+        items = list(r.process_file(open(args.json)))
+    else:
+        items = list(json_to_items(open(args.json),args.bits))
     stop = datetime.now()
     print('Generating hashes took: {}'.format(stop - start))
     items = dict((item.id, item) for item in items)
@@ -64,7 +67,7 @@ def main(args):
         # neighbours: [ [id1, cosine1], [id2, cosine2] ... ]
         neighbours = [i.split(' ') for i in line[1:]]
         neighbours = [(int(id), float(cosine)) for id, cosine in neighbours]
-        correct += proportion_correct(neighbours, queries[id])
+        correct += proportion_correct(neighbours, queries[id], args.k_nearest_neighbours)
         total += 1
     metric =  correct / total
     print('bits:{}-perms:{}-length:{}-window:{}-k:{} gave precision metric of {}'.format(args.bits, args.permutations, args.permutation_length, args.window_size, args.k_nearest_neighbours, metric))
@@ -80,6 +83,7 @@ if __name__ == '__main__':
     p.add_argument('-w', '--window-size', default=10, type=int, help='Window size for each permutation for kNN.')
     p.add_argument('-k', '--k-nearest-neighbours', default=1, type=int, help='Number of k nearest neighbours to evaluate over.')
     p.add_argument('-r', '--prefix-length', default=5, type=int, help='Default length of prefix of hash to use')
+    p.add_argument('--no-json', action='store_true', help='Use precomputed hash file')
     args = p.parse_args()
     
     main(args)
