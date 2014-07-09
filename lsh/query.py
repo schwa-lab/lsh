@@ -50,14 +50,16 @@ class KNNQuery(object):
         ncandidates = self.window_size * 2
         nadded = 0
         for item in buckets[query_prefix]:
-            candidates[item] += 1
-            nadded += 1
+            if query_item.id != item.id:
+                candidates[item] += 1
+                nadded += 1
         prefix_index = 0
         while nadded <= ncandidates and prefix_index < self.prefix_length:
             prefix = query_prefix ^ (1 << prefix_index)
             for item in buckets[prefix]:
-                candidates[item] += 1
-                nadded += 1
+                if query_item.id != item.id:
+                    candidates[item] += 1
+                    nadded += 1
             prefix_index += 1
 
     def add_items_to_index(self, filelike):

@@ -77,7 +77,7 @@ if __name__ == '__main__':
     p = argparse.ArgumentParser()
     p.add_argument('json', help='File containing (id1, name, bow) for documents.')
     p.add_argument('cosine', help='File containing (id1, id2, cosine) for documents.')
-    p.add_argument('-b', '--bits', default=128, type=int, help='Number of permutations.')
+    p.add_argument('-b', '--bits', default=64, type=int, help='Number of permutations.')
     p.add_argument('-p', '--permutations', default=10, type=int, help='Number of permutations for kNN.')
     p.add_argument('-l', '--permutation-length', default=5, type=int, help='Number of bits for permutations for kNN.')
     p.add_argument('-w', '--window-size', default=10, type=int, help='Window size for each permutation for kNN.')
