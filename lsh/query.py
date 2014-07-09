@@ -5,9 +5,9 @@ import random
 from operator import itemgetter
 from collections import defaultdict
 
-from .model import LSHItem
-from .readers import LSHReader
-from .writers import LSHWriter
+from lsh.model import LSHItem
+from lsh.readers import LSHReader
+from lsh.writers import LSHWriter
 
 
 """
@@ -32,34 +32,36 @@ def binary_search(seq, target):
             return m
 
 class KNNQuery(object):
-    def __init__(self, perm_num, perm_length, sig_length, window_size):
+    def __init__(self, perm_num, perm_length, sig_length, window_size, n_hashes):
         self.generate_perms(perm_num, perm_length, sig_length)
         self.window_size = window_size
         self.items = []
+        self.n_hashes = n_hashes
 
 
     def find_neighbours(self, query_item, k):
         candidates = defaultdict(int)
         for perm in self.perms:
-            reps = []
-            query = None
-            for item in self.items:
-                #rep = ''
-                #for bit_index in perm:
-                #    rep += str(int(item.signature[bit_index]))
-                item.signature.lrotate(perm)
-                rep = item.signature
-                reps.append((rep, item))
-                if item.id == query_item.id:
-                    query = rep
-            reps.sort(key=lambda x: x[0])
-            idx = self.find_query_item(reps, query)
-            #print(idx)
-            lower = idx - self.window_size
-            if lower < 0:
-                lower = 0
-            upper = idx + self.window_size + 1
-            self.add_candidates(reps[lower:upper], candidates, query_item)
+            for i in range(self.n_hashes): # TODO: make this global, or parsed into query object etc
+                reps = []
+                query = None
+                for item in self.items:
+                    #rep = ''
+                    #for bit_index in perm:
+                    #    rep += str(int(item.signature[bit_index]))
+                    item.signature.hashes[i].lrotate(perm)
+                    rep = item.signature.hashes[i]
+                    reps.append((rep, item))
+                    if item.id == query_item.id:
+                        query = rep
+                reps.sort(key=lambda x: x[0])
+                idx = self.find_query_item(reps, query)
+                #print(idx)
+                lower = idx - self.window_size
+                if lower < 0:
+                    lower = 0
+                upper = idx + self.window_size + 1
+                self.add_candidates(reps[lower:upper], candidates, query_item)
         sorted_candidates = sorted(candidates.items(), key=itemgetter(1), reverse=True)
         return sorted_candidates[:k]
 

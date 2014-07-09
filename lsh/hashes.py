@@ -2,6 +2,8 @@
 import numpy, sys
 from bitstring import BitArray
 #from test.generate_test_vectors import TestVectorGenerator
+import pyximport; pyximport.install()
+from lsh import bits
 
 class Projection:
     def __init__(self, n_bits, n_feats):
@@ -11,9 +13,15 @@ class Projection:
 
     def hash(self, v):
         h = numpy.dot(self.vectors, v)
-        h = [x > 0 for x in h]
-        return BitArray(h)
+        h = ''.join('1' if x > 0 else '0' for x in h)
+        return int(h,2)
 
+class Hashes:
+    def __init__(self):
+        self.hashes = []
+        #for x in [sig[i:i+64] for i in range(0, len(sig), 64)]:
+    def append(self, x):
+         self.hashes.append(bits.Hash(x))
 
 def main(n_vecs):
    generator = TestVectorGenerator()

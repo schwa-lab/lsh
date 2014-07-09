@@ -1,9 +1,10 @@
 #a!/usr/bin/env python3
-from .model import LSHItem
+from lsh.model import LSHItem
 from bitstring import BitArray
 import pyximport; pyximport.install()
 from lsh import bits
 import random
+from lsh import hashes
 
 
 
@@ -20,8 +21,9 @@ class LSHReader:
         assert len(line) == 2, '{} does not match expected format of space limited line'.format(line)
         id, signature = line
         id = int(id)
-        sig = int(signature[:32], base=2)
-        signature = bits.Hash(sig)
+        #sig = int(signature[:32], base=2)
+        #signature = bits.Hash(sig)
+        signature = hashes.Hashes(signature)
 
         item = LSHItem(id, signature)
         return item

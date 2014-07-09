@@ -6,9 +6,10 @@ Evaluation for LSH v. cosine.
 
 import argparse
 from datetime import datetime
-from .utils import json_to_items
-from .hashes import Projection
-from .query import KNNQuery
+from lsh.utils import json_to_items
+from lsh.hashes import Projection
+from lsh.query import KNNQuery
+import cProfile, pstats, io
 
 
 def proportion_correct(neighbours, candidates):
@@ -20,28 +21,34 @@ def proportion_correct(neighbours, candidates):
 def run_queries(args, items):
     queries = {}
     start = datetime.now()
-    k = KNNQuery(args.permutations, args.permutation_length, args.bits, args.window_size)
-    for item in items.values(): 
+    print ("Loading NN query")
+    k = KNNQuery(args.permutations, args.permutation_length, args.bits, args.window_size, int(args.bits/64))
+    print("Done",datetime.now()-start)
+    for item in items.values():
         k.add_item_to_index(item)
-    for item in items.values(): 
+    count = 0
+    print("Starting queries")
+    for item in items.values():
+        if not count % 10:
+            print("Processed:",count,", Total time:",datetime.now()-start)
         queries[item.id] = k.find_neighbours(item, args.k_nearest_neighbours)
+        count += 1
     stop = datetime.now()
     print('Running queries took {}'.format(stop - start))
     return queries
 
-from .readers import LSHReader
+from lsh.readers import LSHReader
 def main(args):
     print('json:{}'.format(args.json))
     start = datetime.now()
-    #items = list(json_to_items(open(args.json),args.bits))
-    r = LSHReader()
-    items = list(r.process_file(open(args.json)))
+    items = list(json_to_items(open(args.json),args.bits))
+    #r = LSHReader()
+    #items = list(r.process_file(open(args.json)))
     stop = datetime.now()
     print('Generating hashes took: {}'.format(stop - start))
     items = dict((item.id, item) for item in items)
     correct = 0
     total = 0
-    import cProfile, pstats, io
     pr = cProfile.Profile()
     pr.enable()
     queries = run_queries(args, items)
