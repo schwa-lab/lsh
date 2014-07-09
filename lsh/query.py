@@ -30,7 +30,7 @@ class KNNQuery(object):
         candidates = defaultdict(int)
         for perm in self.perms:
             for i in range(self.n_hashes): # TODO: make this global, or parsed into query object etc
-                buckets = defaultdict(set)
+                buckets = defaultdict(list)
                 query_prefix = ""
                 for item in self.items:
                     #rep = ''
@@ -39,30 +39,26 @@ class KNNQuery(object):
                     h = item.signature.hashes[i]
                     h.lrotate(perm)
                     prefix = h.get_prefix(self.prefix_length)
-                    self.add_to_buckets(item, prefix, buckets)
+                    buckets[prefix].append(item)
                     if item.id == query_item.id:
                         query_prefix = prefix
                 self.add_candidates(buckets, candidates, query_item, query_prefix)
         sorted_candidates = sorted(candidates.items(), key=itemgetter(1), reverse=True)
         return sorted_candidates[:k]
 
-    def add_to_buckets(self, item, prefix, buckets):
-        for i in range(self.prefix_length):
-            key = prefix[:i+1]
-            buckets[key].add(item)
-
     def add_candidates(self, buckets, candidates, query_item, query_prefix):
-        ncandidates = self.window_size * 2 + 1
-        ntotal = 0
-        current_prefix = query_prefix
-        while current_prefix:
-            for cand in buckets[current_prefix]:
-                if cand.id != query_item.id:
-                    candidates[cand] += 1
-
-                if ntotal == ncandidates:
-                    break
-            current_prefix = current_prefix[:-1]
+        ncandidates = self.window_size * 2
+        nadded = 0
+        for item in buckets[query_prefix]:
+            candidates[item] += 1
+            nadded += 1
+        prefix_index = 0
+        while nadded <= ncandidates and prefix_index < self.prefix_length:
+            prefix = query_prefix ^ (1 << prefix_index)
+            for item in buckets[prefix]:
+                candidates[item] += 1
+                nadded += 1
+            prefix_index += 1
 
     def add_items_to_index(self, filelike):
         r = LSHReader()
