@@ -24,7 +24,6 @@ def run_queries(args, items):
     for item in items.values(): 
         k.add_item_to_index(item)
     for item in items.values(): 
-        if item.id > 10: continue
         queries[item.id] = k.find_neighbours(item, args.k_nearest_neighbours)
     stop = datetime.now()
     print('Running queries took {}'.format(stop - start))
