@@ -20,6 +20,9 @@ cdef class Hash:
 
     def get_data(self):
         return self.data
+    
+    def get_bits(self, unsigned int index):
+        pass
 
     def __richcmp__(Hash self, Hash other, int op):
         if op == 0:

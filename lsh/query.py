@@ -32,7 +32,7 @@ def binary_search(seq, target):
             return m
 
 class KNNQuery(object):
-    def __init__(self, perm_num, perm_length, sig_length, window_size):
+    def __init__(self, perm_num, perm_length, sig_length, window_size, bucket_sig=10):
         self.generate_perms(perm_num, perm_length, sig_length)
         self.window_size = window_size
         self.items = []
@@ -41,27 +41,43 @@ class KNNQuery(object):
     def find_neighbours(self, query_item, k):
         candidates = defaultdict(int)
         for perm in self.perms:
-            reps = []
-            query = None
+            #reps = []
+            item_reps = defaultdict(set)
+            query_reps = []
             for item in self.items:
                 #rep = ''
                 #for bit_index in perm:
                 #    rep += str(int(item.signature[bit_index]))
                 item.signature.lrotate(perm)
                 rep = item.signature
-                reps.append((rep, item))
-                if item.id == query_item.id:
-                    query = rep
-            reps.sort(key=lambda x: x[0])
-            idx = self.find_query_item(reps, query)
+                #reps.append((rep, item))
+                for i in range(self.bucket_sig):
+                    item_reps[item.signature.get_bit(i)].add(item)
+                    if item.id == query_item.id:
+                        query_reps.append(rep)
+            self.add_candidates(self.find_candidates(item_reps, query_reps), candidates, query_item)
+            
+            #reps.sort(key=lambda x: x[0])
+            #idx = self.find_query_item(reps, query)
             #print(idx)
-            lower = idx - self.window_size
-            if lower < 0:
-                lower = 0
-            upper = idx + self.window_size + 1
-            self.add_candidates(reps[lower:upper], candidates, query_item)
+            #lower = idx - self.window_size
+            #if lower < 0:
+                #lower = 0
+            #upper = idx + self.window_size + 1
+            #self.add_candidates(reps[lower:upper], candidates, query_item)
         sorted_candidates = sorted(candidates.items(), key=itemgetter(1), reverse=True)
         return sorted_candidates[:k]
+
+
+    def find_candidates(self, item_reps, query_reps):
+        candidates = set()
+        size = 2 * self.window_size + 1
+        for bucket_rep in reversed(query_reps):
+            if len(candidates) >= size:
+                return list(candidates)[:size]
+            else:
+                candidates |= item_reps[bucket_rep]
+        return list(candidates)
 
 
     def add_candidates(self, reps, candidates, query_item):
