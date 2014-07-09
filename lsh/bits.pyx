@@ -1,35 +1,28 @@
 """
-
-usage example
-
-import pyximport; pyximport.install()
-
-import this_module
-l = range(this_module.ARRAY_SIZE)
-import random
-random.shuffle(l)
-index = this_module.Index(l)
-index.permute(555)
+Simple hash container with a basic bitwise left rotate operation
 """
 
 
-DEF N = 4
-ARRAY_SIZE = N
+DEF BITS_IN_CHAR = 4
 
 cdef class Hash:
-    cdef unsigned int[N] permutation # 32 x N bit array
+    cdef unsigned long data # 128 bit
 
-    def __cinit__(self, permutation):
-        assert len(permutation) == N
-        for i in range(N):
-            self.permutation[i] = permutation[i]
-            #self.permutation[i] = 2 ** permutation[i]
+    def __cinit__(self, data):
+        self.data = data
 
-    def permute(self, unsigned int x):
-        cdef unsigned int out = 0
-        cdef unsigned int offset = 1
-        for i in range(N):
-            if x & self.permutation[i]:
-                out |= offset
-            offset = offset << 1
-        return out
+    def lrotate(self, unsigned int shift):
+        self.data = (self.data << shift) | (self.data >> (sizeof(self.data) * BITS_IN_CHAR - shift))
+
+    def rrotate(self, unsigned int shift):
+        """Doesn't seem to work :("""
+        self.data = (self.data >> shift) | (self.data << (sizeof(self.data) * BITS_IN_CHAR - shift))
+
+    def get_data(self):
+        return self.data
+
+    def __richcmp__(Hash self, Hash other, int op):
+        if op == 0:
+            return self.data < other.data
+        return 0
+

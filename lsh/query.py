@@ -47,8 +47,8 @@ class KNNQuery(object):
                 #rep = ''
                 #for bit_index in perm:
                 #    rep += str(int(item.signature[bit_index]))
-                item.signature.ror(perm)
-                rep = item.signature.bin
+                item.signature.lrotate(perm)
+                rep = item.signature
                 reps.append((rep, item))
                 if item.id == query_item.id:
                     query = rep

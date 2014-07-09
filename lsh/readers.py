@@ -20,12 +20,10 @@ class LSHReader:
         assert len(line) == 2, '{} does not match expected format of space limited line'.format(line)
         id, signature = line
         id = int(id)
-        b_signature = BitArray('0b' + signature)
-        n = 32
-        splits = [b_signature[i:i+n].uint for i in range(0,len(b_signature),n)]
-        signature = bits.Hash(splits)
-        
-        item = LSHItem(id, b_signature)
+        sig = int(signature[:32], base=2)
+        signature = bits.Hash(sig)
+
+        item = LSHItem(id, signature)
         return item
 
 class BinaryReader:
