@@ -22,7 +22,7 @@ def run_queries(args, items):
     queries = {}
     start = datetime.now()
     print ("Loading NN query")
-    k = KNNQuery(args.permutations, args.permutation_length, args.bits, args.window_size, int(args.bits/64))
+    k = KNNQuery(args.permutations, args.permutation_length, args.bits, args.window_size, int(args.bits/64), args.prefix_length)
     print("Done",datetime.now()-start)
     for item in items.values():
         k.add_item_to_index(item)
@@ -79,6 +79,7 @@ if __name__ == '__main__':
     p.add_argument('-l', '--permutation-length', default=5, type=int, help='Number of bits for permutations for kNN.')
     p.add_argument('-w', '--window-size', default=10, type=int, help='Window size for each permutation for kNN.')
     p.add_argument('-k', '--k-nearest-neighbours', default=1, type=int, help='Number of k nearest neighbours to evaluate over.')
+    p.add_argument('-r', '--prefix-length', default=5, type=int, help='Default length of prefix of hash to use')
     args = p.parse_args()
     
     main(args)

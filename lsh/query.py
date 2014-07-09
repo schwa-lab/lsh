@@ -18,87 +18,59 @@ KNNQuery needs to run in two modes:
 
 """
 
-def binary_search(seq, target):
-    lower = 0
-    upper = len(seq) - 1
-    while True:
-        if upper < lower: return -1
-        m = (lower + upper) // 2
-        if seq[m][0] < target:
-            lower = m + 1
-        elif seq[m][0] > target:
-            upper = m - 1
-        else:
-            return m
-
 class KNNQuery(object):
-    def __init__(self, perm_num, perm_length, sig_length, window_size, n_hashes):
+    def __init__(self, perm_num, perm_length, sig_length, window_size, n_hashes, prefix_length):
         self.generate_perms(perm_num, perm_length, sig_length)
         self.window_size = window_size
         self.items = []
         self.n_hashes = n_hashes
-
+        self.prefix_length = prefix_length
 
     def find_neighbours(self, query_item, k):
         candidates = defaultdict(int)
         for perm in self.perms:
             for i in range(self.n_hashes): # TODO: make this global, or parsed into query object etc
-                reps = []
-                query = None
+                buckets = defaultdict(set)
+                query_prefix = ""
                 for item in self.items:
                     #rep = ''
                     #for bit_index in perm:
                     #    rep += str(int(item.signature[bit_index]))
-                    item.signature.hashes[i].lrotate(perm)
-                    rep = item.signature.hashes[i]
-                    reps.append((rep, item))
+                    h = item.signature.hashes[i]
+                    h.lrotate(perm)
+                    prefix = h.get_prefix(self.prefix_length)
+                    self.add_to_buckets(item, prefix, buckets)
                     if item.id == query_item.id:
-                        query = rep
-                reps.sort(key=lambda x: x[0])
-                idx = self.find_query_item(reps, query)
-                #print(idx)
-                lower = idx - self.window_size
-                if lower < 0:
-                    lower = 0
-                upper = idx + self.window_size + 1
-                self.add_candidates(reps[lower:upper], candidates, query_item)
+                        query_prefix = prefix
+                self.add_candidates(buckets, candidates, query_item, query_prefix)
         sorted_candidates = sorted(candidates.items(), key=itemgetter(1), reverse=True)
         return sorted_candidates[:k]
 
+    def add_to_buckets(self, item, prefix, buckets):
+        for i in range(self.prefix_length):
+            key = prefix[:i+1]
+            buckets[key].add(item)
 
-    def find_candidates(self, item_reps, query_reps):
-        candidates = set()
-        size = 2 * self.window_size + 1
-        for bucket_rep in reversed(query_reps):
-            if len(candidates) >= size:
-                return list(candidates)[:size]
-            else:
-                candidates |= item_reps[bucket_rep]
-        return list(candidates)
+    def add_candidates(self, buckets, candidates, query_item, query_prefix):
+        ncandidates = self.window_size * 2 + 1
+        ntotal = 0
+        current_prefix = query_prefix
+        while current_prefix:
+            for cand in buckets[current_prefix]:
+                if cand.id != query_item.id:
+                    candidates[cand] += 1
 
-
-    def add_candidates(self, reps, candidates, query_item):
-        for rep, item in reps:
-            if item.id != query_item.id:
-                #print((rep, item))
-                candidates[item] += 1
-        
-
-    def find_query_item(self, reps, query):
-        idx = binary_search(reps, query)
-        assert idx != -1, "Could not find index of {} in permutation".format(query)
-        return idx
-
+                if ntotal == ncandidates:
+                    break
+            current_prefix = current_prefix[:-1]
 
     def add_items_to_index(self, filelike):
         r = LSHReader()
         for item in r.process_file(filelike):
             self.add_item_to_index(item)
 
-
     def add_item_to_index(self, item):
         self.items.append(item)
-
 
     def generate_perms(self, perm_num, perm_length, sig_length):
         self.perm_length = perm_length
