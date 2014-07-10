@@ -19,8 +19,8 @@ KNNQuery needs to run in two modes:
 """
 
 class KNNQuery(object):
-    def __init__(self, perm_num, perm_length, sig_length, window_size, n_hashes, prefix_length):
-        self.generate_perms(perm_num, perm_length, sig_length)
+    def __init__(self, perm_num, sig_length, window_size, n_hashes, prefix_length):
+        self.generate_perms(perm_num, sig_length)
         self.window_size = window_size
         self.items = []
         self.sig_length = sig_length
@@ -38,13 +38,15 @@ class KNNQuery(object):
                     #for bit_index in perm:
                     #    rep += str(int(item.signature[bit_index]))
                     h = item.signature.hashes[i]
-                    h.lrotate(perm)
                     prefix = h.get_prefix(self.prefix_length)
+                    h.lrotate(perm)
                     # h.print_bitstring(h.working)
-                    buckets[prefix].append(item)
                     if item.id == query_item.id:
                         query_prefix = prefix
-                self.add_candidates(buckets, candidates, query_item, query_prefix)
+                    else:
+                        buckets[prefix].append(item)
+                self.add_candidates(buckets, candidates, query_item, query_prefix, correct)
+                # print(query_prefix, correct_prefixes)
         sorted_candidates = sorted(candidates.items(), key=itemgetter(1), reverse=True)
         return sorted_candidates[:k]
 
@@ -72,8 +74,7 @@ class KNNQuery(object):
     def add_item_to_index(self, item):
         self.items.append(item)
 
-    def generate_perms(self, perm_num, perm_length, sig_length):
-        self.perm_length = perm_length
+    def generate_perms(self, perm_num, sig_length):
         self.perms = []
         ints = list(range(sig_length))
         random.shuffle(ints)
@@ -83,14 +84,14 @@ class KNNQuery(object):
                 continue
             total_rot += r
             self.perms.append(r)
-            if len(self.perms) == perm_length:
+            if len(self.perms) == perm_num:
                 break
 
         
 
 if __name__ == '__main__':
     TESTFILE = './schwa-py-lsh/test/test_data_1000.txt'
-    q = KNNQuery(perm_num=10, perm_length=5, sig_length=100, window_size=10)
+    q = KNNQuery(perm_num=10, sig_length=100, window_size=10)
     q.add_items_to_index(open(TESTFILE, 'r'))
     for item in q.items:
         print(str(item))
