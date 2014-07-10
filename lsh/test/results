@@ -1,0 +1,23 @@
+Prefix Length
+=============
+Length      Time (hh:mm)    Precision
+2           01:06           0.0067
+10          00:35           0.0108
+20          10:35           0.0087
+
+Number of Permutations
+======================
+Perms       Time (hh:mm)    Precision
+5           00:07           0.0039
+10          00:15           0.0152
+15          00:28           0.0172
+20          00:36           0.0162
+
+
+Number of Bits
+==============
+Bits        Time (hh:mm)    Precision
+64          00:13           0.0067
+128         00:40           0.0211
+256         01:41           0.0619
+512         02:06           0.0652
