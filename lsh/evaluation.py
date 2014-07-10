@@ -13,11 +13,10 @@ import cProfile, pstats, io
 
 
 def proportion_correct(neighbours, candidates, k):
-    print('neighbours:{}\tcandidates:{}'.format(neighbours, [x.get_data() for x in candidates[0][0].signature.hashes]))
-    print()
+    # print('neighbours:{}\tcandidates:{}\n'.format(neighbours, [(x.data, x.working) for x in candidates[0][0].signature.hashes] if candidates else []))
     intersection = set(n[0] for n in neighbours[:k]).intersection(set(c[0].id for c in candidates[:k]))
     return len(intersection)/k
-        
+
 
 def run_queries(args, items):
     queries = {}

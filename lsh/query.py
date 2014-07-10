@@ -2,7 +2,6 @@
 
 import random
 
-from copy import deepcopy
 from operator import itemgetter
 from collections import defaultdict
 
@@ -40,8 +39,8 @@ class KNNQuery(object):
                     #    rep += str(int(item.signature[bit_index]))
                     h = item.signature.hashes[i]
                     h.lrotate(perm)
-                    prefix = deepcopy(h.get_data())
-                    prefix = prefix >> (self.sig_length - self.prefix_length)
+                    prefix = h.get_prefix(self.prefix_length)
+                    # h.print_bitstring(h.working)
                     buckets[prefix].append(item)
                     if item.id == query_item.id:
                         query_prefix = prefix

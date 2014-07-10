@@ -45,7 +45,7 @@ def vectors_to_items(vectors, bits):
         h = Hashes()
         for p in proj:
             h.append(p.hash(v))
-        print(v, [x.get_data() for x in h.hashes])
+        # print(v, [x.data for x in h.hashes])
         yield LSHItem(id, h, vector = v)
 
 
