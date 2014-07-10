@@ -45,7 +45,7 @@ class KNNQuery(object):
                         query_prefix = prefix
                     else:
                         buckets[prefix].append(item)
-                self.add_candidates(buckets, candidates, query_item, query_prefix, correct)
+                self.add_candidates(buckets, candidates, query_item, query_prefix)
                 # print(query_prefix, correct_prefixes)
         sorted_candidates = sorted(candidates.items(), key=itemgetter(1), reverse=True)
         return sorted_candidates[:k]
