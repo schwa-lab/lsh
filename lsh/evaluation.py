@@ -18,7 +18,7 @@ def proportion_correct(neighbours, candidates, k):
     return len(intersection)/k
 
 
-def run_queries(args, items):
+def run_queries(args, items, correct=None):
     queries = {}
     start = datetime.now()
     print ("Loading NN query")
@@ -31,7 +31,7 @@ def run_queries(args, items):
     for item in items.values():
         if not count % 100:
             print("Processed:",count,", Total time:",datetime.now()-start)
-        queries[item.id] = k.find_neighbours(item, args.k_nearest_neighbours)
+        queries[item.id] = k.find_neighbours(item, args.k_nearest_neighbours, correct.get(item.id) if correct else None)
         count += 1
     stop = datetime.now()
     print('Running queries took {}'.format(stop - start))
@@ -41,6 +41,7 @@ from lsh.readers import LSHReader
 def main(args):
     print('json:{}'.format(args.json))
     start = datetime.now()
+    # read in a list of LSHItems
     if args.no_json:
         r = LSHReader()
         items = list(r.process_file(open(args.json)))
@@ -48,6 +49,7 @@ def main(args):
         items = list(json_to_items(open(args.json),args.bits))
     stop = datetime.now()
     print('Generating hashes took: {}'.format(stop - start))
+    # map id to item
     items = dict((item.id, item) for item in items)
     correct = 0
     total = 0
@@ -65,7 +67,7 @@ def main(args):
         neighbours = [(int(id), float(cosine)) for id, cosine in neighbours]
         correct_candidates[id] = neighbours
 
-    queries = run_queries(args, items)
+    queries = run_queries(args, items, correct_candidates if args.debug else None)
 
     if args.profile:
         pr.disable()
@@ -93,6 +95,7 @@ if __name__ == '__main__':
     p.add_argument('-r', '--prefix-length', default=5, type=int, help='Default length of prefix of hash to use')
     p.add_argument('--no-json', action='store_true', help='Use precomputed hash file')
     p.add_argument('--profile', action='store_true', default=False, help='Profile the performance')
+    p.add_argument('--debug', action='store_true', default=False, help='Print debugging information')
     args = p.parse_args()
     
     main(args)
