@@ -64,8 +64,9 @@ class KNNQuery(object):
                         query_prefix = prefix
                     else:
                         buckets[prefix].append(item)
-                    if any(item.id == y[0] for y in correct):
-                        correct_prefixes.append(prefix)
+                    if correct:
+                        if any(item.id == y[0] for y in correct):
+                            correct_prefixes.append(prefix)
                 self.add_candidates(buckets, candidates, query_item, query_prefix, correct)
                 # print(query_prefix, correct_prefixes)
         sorted_candidates = sorted(candidates.items(), key=itemgetter(1), reverse=True)
