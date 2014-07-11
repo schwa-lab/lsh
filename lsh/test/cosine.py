@@ -21,7 +21,8 @@ def main(filename):
             del bow['']
         except KeyError:
             pass
-        docs.append((id, name, bow))
+        if bow:
+            docs.append((id, name, bow))
    
     for i, (id1, name1, bow1) in enumerate(docs):
         for j, (id2, name2, bow2) in enumerate(docs[i+1:]):
