@@ -54,12 +54,12 @@ def test_random_vecs(n_vecs):
 
 
 import json
-def test_json():
+def test_json(f):
     BITS = 128
 
     f_space = set()
     docs = []
-    for id, name, bow in json.load(open('test/wiki_data.json')):
+    for id, name, bow in json.load(open(f)):
         docs.append((id, name, bow))
         f_space |= set(bow.keys())
 
@@ -76,8 +76,8 @@ def test_json():
             if not word: # remove empty strings, again
                 continue
             vec[f_space[word]] = count
-        print(id, proj.hash(vec).bin)
+        print(id, "{0:064b}".format(proj.hash(vec)))
 
 if __name__ == '__main__':
     #main(int(sys.argv[1]))
-    test_json()
+    test_json(sys.argv[1])
