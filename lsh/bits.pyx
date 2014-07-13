@@ -41,18 +41,21 @@ cdef class Hash:
                 self.data[index] &= ~(shifter << slot)
                 self.working[index] &= ~(shifter << slot)
 
-    cpdef lassign(self, int assign):
-        assign %= N
-        temp = list(range(N))
-        cdef int index
+    cpdef reverse(self, int low, int high):
+        cdef unsigned long long left = self.working[low]
+        cdef unsigned long long right = self.working[high]
+        cdef unsigned long long temp
+        while low < high:
+            temp = self.working[low]
+            self.working[low] = self.working[high]
+            self.working[high] = temp
+            low += 1
+            high -= 1
 
-        for i in range(N):
-            temp[i] = self.working[i]
-        for i in range(N):
-            index = i + assign
-            if index >= N:
-                index -= N
-            self.working[i] = temp[index]
+    cpdef lassign(self, int assign):
+        self.reverse(0, N)
+        self.reverse(0, N - assign)
+        self.reverse(N - assign, N)
 
     cpdef lrotate(self, unsigned long long shift):
         cdef int i = N - 1
@@ -61,10 +64,10 @@ cdef class Hash:
         if shift == self.size * N or shift == 0:
             return
         elif shift >= self.size:
-            while shift >= self.size:
-                assign += 1
-                shift -= self.size
-            if assign > 0:
+            assign = shift // self.size
+            shift %= self.size
+            assign %= N
+            if assign != 0:
                 self.lassign(assign)
             if shift == 0:
                 return
