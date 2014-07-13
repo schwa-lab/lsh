@@ -2,6 +2,7 @@
 
 import math
 import random
+from datetime import datetime
 
 from operator import itemgetter
 from collections import defaultdict
@@ -48,9 +49,12 @@ class KNNQuery(object):
             correct = {}
         neighbours = {}
         candidates = defaultdict(lambda: defaultdict(int))
-        for perm in self.perms:
+        start = datetime.now()
+        for i, perm in enumerate(self.perms):
             buckets = defaultdict(list)
             prefixes = {}
+            if i and i % 100 == 0:
+                print("Processed {} permutations, Total time: {}".format(i, datetime.now() - start))
 
             # do the hashing
             for item in self.items:
