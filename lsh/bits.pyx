@@ -57,8 +57,7 @@ cdef class Hash:
         self.reverse(0, N - assign - 1)
         self.reverse(N - assign, N - 1)
 
-    cpdef lrotate(self, unsigned long long shift):
-        cdef int i = N - 1
+    cpdef lrotate(self, unsigned int shift):
         cdef int assign = 0
 
         if shift == self.size * N or shift == 0:
@@ -74,6 +73,8 @@ cdef class Hash:
 
         cdef unsigned long long reverse_shift = (self.size - shift) % self.size
         cdef unsigned long long carry = self.working[0] >> (reverse_shift)
+        cdef unsigned long long new_carry
+        cdef int i = N - 1
 
         while i >= 0:
             new_carry = self.working[i] >> (reverse_shift)
@@ -81,7 +82,7 @@ cdef class Hash:
             carry = new_carry
             i -= 1
 
-    cpdef unsigned long long get_prefix(self, unsigned long long length) except *:
+    cpdef unsigned long long get_prefix(self, unsigned int length):
         return self.working[0] >> (self.size - length)
 
     cpdef unsigned long long get_first_data(self):
