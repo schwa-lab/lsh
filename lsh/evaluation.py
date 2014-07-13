@@ -27,11 +27,7 @@ def run_queries(args, items, correct=None):
         k.add_item_to_index(item)
     count = 0
     print("Starting queries")
-    for item in items.values():
-        if not count % 100:
-            print("Processed:",count,", Total time:",datetime.now()-start)
-        queries[item.id] = k.find_neighbours(item, args.k_nearest_neighbours, correct.get(item.id) if correct else None)
-        count += 1
+    queries = k.find_all_neighbours(item, args.k_nearest_neighbours, correct)
     stop = datetime.now()
     print('Running queries took {}'.format(stop - start))
     return queries

@@ -43,35 +43,34 @@ class KNNQuery(object):
         self.n_hashes = n_hashes
         self.prefix_length = prefix_length
 
-    def find_neighbours(self, query_item, k, correct=None):
+    def find_all_neighbours(self, query_item, k, correct=None):
         if correct is None:
-            correct = []
-        candidates = defaultdict(int)
+            correct = {}
+        neighbours = {}
+        candidates = defaultdict(lambda: defaultdict(int))
         for perm in self.perms:
             buckets = defaultdict(list)
-            query_prefix = ""
-            correct_prefixes = []
+            prefixes = {}
+
+            # do the hashing
             for item in self.items:
-                #rep = ''
-                #for bit_index in perm:
-                #    rep += str(int(item.signature[bit_index]))
                 h = item.signature
-                prefix = h.get_prefix(self.prefix_length)
                 h.lrotate(perm)
-                # h.print_bitstring(h.working)
-                if item.id == query_item.id:
-                    query_prefix = prefix
-                else:
-                    buckets[prefix].append(item)
-                if correct:
-                    if any(item.id == y[0] for y in correct):
-                        correct_prefixes.append(prefix)
-            self.add_candidates(buckets, candidates, query_item, query_prefix, correct)
-            # print(query_prefix, correct_prefixes)
-        sorted_candidates = sorted(candidates.items(), key=itemgetter(1), reverse=True)
+                prefix = h.get_prefix(self.prefix_length)
+                prefixes[item.id] = prefix
+                buckets[prefix].append(item)
+
+            # do the lookup-ing
+            for item in self.items:
+                query_prefix = prefixes[item.id]
+                self.add_candidates(buckets, candidates[item.id], item, query_prefix, correct)
+
+        for id in candidates:
+            candidates[id] = sorted(candidates[id].items(), key=itemgetter(1), reverse=True)
+
         if correct:
-            self.print_debug(query_item, sorted_candidates, correct)
-        return sorted_candidates
+            self.print_debug(query_item, candidates, correct)
+        return candidates
 
     def print_debug(self, query_item, sorted_candidates, correct=None):
         for candidate in sorted_candidates:
@@ -85,24 +84,15 @@ class KNNQuery(object):
         ncandidates = self.window_size * 2
         nadded = 0
         for item in buckets[query_prefix]:
-            candidates[item] += 1
-            nadded += 1
-            # if correct:
-            #     if any(item.id == y[0] for y in correct):
-            #         print("Adding correct to candidates with original prefix {}".format(query_prefix))
-            #     else:
-            #         print("Adding incorrect to candidates with original prefix {}".format(query_prefix))
+            if item.id != query_item.id:
+                candidates[item] += 1
+                nadded += 1
         prefix_index = 0
         while nadded <= ncandidates and prefix_index < self.prefix_length:
             prefix = query_prefix ^ (1 << prefix_index)
             for item in buckets[prefix]:
                 candidates[item] += 1
                 nadded += 1
-                # if correct:
-                #     if any(item.id == y[0] for y in correct):
-                #         print("Adding correct to candidates with prefix {}".format(prefix))
-                #     else:
-                #         print("Adding incorrect to candidates with prefix {}".format(prefix))
             prefix_index += 1
 
     def add_items_to_index(self, filelike):
