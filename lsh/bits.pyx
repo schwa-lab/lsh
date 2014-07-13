@@ -53,9 +53,9 @@ cdef class Hash:
             high -= 1
 
     cpdef lassign(self, int assign):
-        self.reverse(0, N)
-        self.reverse(0, N - assign)
-        self.reverse(N - assign, N)
+        self.reverse(0, N - 1)
+        self.reverse(0, N - assign - 1)
+        self.reverse(N - assign, N - 1)
 
     cpdef lrotate(self, unsigned long long shift):
         cdef int i = N - 1
