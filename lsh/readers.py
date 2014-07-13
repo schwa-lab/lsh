@@ -6,7 +6,8 @@ import random
 
 class LSHReader:
     def __init__(self):
-        from lsh import hashes
+        import pyximport; pyximport.install()
+        from lsh import bits
 
     def process_file(self, filelike):
         for line in filelike:
@@ -18,8 +19,8 @@ class LSHReader:
         id, signature = line
         id = int(id)
         #sig = int(signature[:32], base=2)
-        #signature = bits.Hash(sig)
-        signature = hashes.Hashes(signature)
+        signature = bits.Hash(sig)
+        # signature = hashes.Hashes(signature)
 
         item = LSHItem(id, signature)
         return item
