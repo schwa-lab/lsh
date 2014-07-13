@@ -107,5 +107,6 @@ if __name__ == '__main__':
     args = p.parse_args()
 
     write_nbits(args.bits)
+    import pyximport; pyximport.install()
 
     main(args)
