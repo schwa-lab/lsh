@@ -2,9 +2,8 @@
 
 import json
 from lsh.model import LSHItem
-from lsh.hashes import Projection, Hashes
-
-BITS = 128
+from lsh.hashes import Projection
+from lsh import bits
 
 def json_to_vectors(filelike):
     """
@@ -35,21 +34,15 @@ def json_to_vectors(filelike):
         yield (id, vec)
 
 
-def vectors_to_items(vectors, bits):
+def vectors_to_items(vectors):
     vectors = list(vectors)
-    n_proj = bits//64
-    proj = []
-    for i in range(n_proj):
-        proj.append(Projection(bits, len(vectors[0][1])))
+    projection = Projection(bits.NBITS(), len(vectors[0][1]))
     for id, v in vectors:
-        h = Hashes()
-        for p in proj:
-            h.append(p.hash(v))
-        # print(v, [x.data for x in h.hashes])
-        yield LSHItem(id, h, vector = v)
+        hash = bits.Hash(projection.hash(v))
+        yield LSHItem(id, hash, vector=v)
 
 
-def json_to_items(filelike, bits):
-    return vectors_to_items(json_to_vectors(filelike), bits)
+def json_to_items(filelike):
+    return vectors_to_items(json_to_vectors(filelike))
 
 

@@ -1,16 +1,12 @@
 #a!/usr/bin/env python3
 from lsh.model import LSHItem
-from bitstring import BitArray
-import pyximport; pyximport.install()
-from lsh import bits
 import random
-from lsh import hashes
 
 
 
 class LSHReader:
     def __init__(self):
-        pass
+        from lsh import hashes
 
     def process_file(self, filelike):
         for line in filelike:

@@ -48,38 +48,36 @@ class KNNQuery(object):
             correct = []
         candidates = defaultdict(int)
         for perm in self.perms:
-            for i in range(self.n_hashes): # TODO: make this global, or parsed into query object etc
-                buckets = defaultdict(list)
-                query_prefix = ""
-                correct_prefixes = []
-                for item in self.items:
-                    #rep = ''
-                    #for bit_index in perm:
-                    #    rep += str(int(item.signature[bit_index]))
-                    h = item.signature.hashes[i]
-                    prefix = h.get_prefix(self.prefix_length)
-                    h.lrotate(perm)
-                    # h.print_bitstring(h.working)
-                    if item.id == query_item.id:
-                        query_prefix = prefix
-                    else:
-                        buckets[prefix].append(item)
-                    if correct:
-                        if any(item.id == y[0] for y in correct):
-                            correct_prefixes.append(prefix)
-                self.add_candidates(buckets, candidates, query_item, query_prefix, correct)
-                # print(query_prefix, correct_prefixes)
+            buckets = defaultdict(list)
+            query_prefix = ""
+            correct_prefixes = []
+            for item in self.items:
+                #rep = ''
+                #for bit_index in perm:
+                #    rep += str(int(item.signature[bit_index]))
+                h = item.signature
+                prefix = h.get_prefix(self.prefix_length)
+                h.lrotate(perm)
+                # h.print_bitstring(h.working)
+                if item.id == query_item.id:
+                    query_prefix = prefix
+                else:
+                    buckets[prefix].append(item)
+                if correct:
+                    if any(item.id == y[0] for y in correct):
+                        correct_prefixes.append(prefix)
+            self.add_candidates(buckets, candidates, query_item, query_prefix, correct)
+            # print(query_prefix, correct_prefixes)
         sorted_candidates = sorted(candidates.items(), key=itemgetter(1), reverse=True)
         if correct:
             self.print_debug(query_item, sorted_candidates, correct)
-        return sorted_candidates[:k]
+        return sorted_candidates
 
     def print_debug(self, query_item, sorted_candidates, correct=None):
         for candidate in sorted_candidates:
-            for i in range(self.n_hashes):
-                cosine = cosine_sim(query_item.vector, candidate[0].vector)
-                if cosine > 0.4:
-                    print(i, "XOR similarity:", compute_sim(query_item.signature.hashes[i].data, candidate[0].signature.hashes[i].data, self.sig_length), "Cosine similarity:", cosine)
+            cosine = cosine_sim(query_item.vector, candidate[0].vector)
+            if cosine > 0.1:
+                print("XOR similarity:", compute_sim(query_item.signature.get_first_working(), candidate[0].signature.get_first_working(), self.sig_length), "Cosine similarity:", cosine)
 
     def add_candidates(self, buckets, candidates, query_item, query_prefix, correct=None):
         if correct is None:
@@ -89,22 +87,22 @@ class KNNQuery(object):
         for item in buckets[query_prefix]:
             candidates[item] += 1
             nadded += 1
-            if correct:
-                if any(item.id == y[0] for y in correct):
-                    print("Adding correct to candidates with original prefix {}".format(query_prefix))
-                else:
-                    print("Adding incorrect to candidates with original prefix {}".format(query_prefix))
+            # if correct:
+            #     if any(item.id == y[0] for y in correct):
+            #         print("Adding correct to candidates with original prefix {}".format(query_prefix))
+            #     else:
+            #         print("Adding incorrect to candidates with original prefix {}".format(query_prefix))
         prefix_index = 0
         while nadded <= ncandidates and prefix_index < self.prefix_length:
             prefix = query_prefix ^ (1 << prefix_index)
             for item in buckets[prefix]:
                 candidates[item] += 1
                 nadded += 1
-                if correct:
-                    if any(item.id == y[0] for y in correct):
-                        print("Adding correct to candidates with prefix {}".format(prefix))
-                    else:
-                        print("Adding incorrect to candidates with prefix {}".format(prefix))
+                # if correct:
+                #     if any(item.id == y[0] for y in correct):
+                #         print("Adding correct to candidates with prefix {}".format(prefix))
+                #     else:
+                #         print("Adding incorrect to candidates with prefix {}".format(prefix))
             prefix_index += 1
 
     def add_items_to_index(self, filelike):
@@ -116,19 +114,9 @@ class KNNQuery(object):
         self.items.append(item)
 
     def generate_perms(self, perm_num, sig_length):
-        self.perms = []
-        ints = list(range(sig_length))
-        random.shuffle(ints)
-        total_rot = 0
-        for r in ints:
-            if not total_rot + r % sig_length:
-                continue
-            total_rot += r
-            self.perms.append(r)
-            if len(self.perms) == perm_num:
-                break
+        self.perms = list(random.randint(1, sig_length - 1) for i in range(perm_num))
+        random.shuffle(self.perms)
 
-        
 
 if __name__ == '__main__':
     TESTFILE = './schwa-py-lsh/test/test_data_1000.txt'

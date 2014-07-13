@@ -6,17 +6,16 @@ Evaluation for LSH v. cosine.
 
 import argparse
 from datetime import datetime
-from lsh.utils import json_to_items
-from lsh.hashes import Projection
 from lsh.query import KNNQuery
 import cProfile, pstats, io
 
+NBITS_HEADER = "consts.pxi"
+BASE_SIZE = 64 # size of unsigned long long
 
 def proportion_correct(neighbours, candidates, k):
     # print('neighbours:{}\tcandidates:{}\n'.format(neighbours, [(x.data, x.working) for x in candidates[0][0].signature.hashes] if candidates else []))
     intersection = set(n[0] for n in neighbours[:k]).intersection(set(c[0].id for c in candidates[:k]))
     return len(intersection)/k
-
 
 def run_queries(args, items, correct=None):
     queries = {}
@@ -39,6 +38,8 @@ def run_queries(args, items, correct=None):
 
 from lsh.readers import LSHReader
 def main(args):
+    from lsh.hashes import Projection
+    from lsh.utils import json_to_items
     print('json:{}'.format(args.json))
     start = datetime.now()
     # read in a list of LSHItems
@@ -46,7 +47,7 @@ def main(args):
         r = LSHReader()
         items = list(r.process_file(open(args.json)))
     else:
-        items = list(json_to_items(open(args.json),args.bits))
+        items = list(json_to_items(open(args.json)))
     stop = datetime.now()
     print('Generating hashes took: {}'.format(stop - start))
     # map id to item
@@ -77,12 +78,19 @@ def main(args):
         ps.print_stats()
         print(s.getvalue())
 
+    total_candidates = 0
     for id in correct_candidates:
         correct += proportion_correct(correct_candidates[id], queries[id], args.k_nearest_neighbours)
+        total_candidates += len(queries[id])
         total += 1
     metric =  correct / total
-    print('bits:{}-perms:{}-prefix:{}-window:{}-k:{} gave precision metric of {}'.format(args.bits, args.permutations, args.prefix_length, args.window_size, args.k_nearest_neighbours, metric))
+    max_candidates = len(queries)
+    avg_candidates = total_candidates / max_candidates
+    print('bits:{}-perms:{}-prefix:{}-window:{}-k:{} gave recall metric of {} with an average of {} candidates ({} total queries)'.format(args.bits, args.permutations, args.prefix_length, args.window_size, args.k_nearest_neighbours, metric, avg_candidates, max_candidates))
 
+def write_nbits(nbits):
+    with open(NBITS_HEADER, 'w') as f:
+        f.write("DEF N = {}\n".format(int(nbits / BASE_SIZE)))
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser()
@@ -97,5 +105,7 @@ if __name__ == '__main__':
     p.add_argument('--profile', action='store_true', default=False, help='Profile the performance')
     p.add_argument('--debug', action='store_true', default=False, help='Print debugging information')
     args = p.parse_args()
-    
+
+    write_nbits(args.bits)
+
     main(args)

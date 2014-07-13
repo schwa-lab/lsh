@@ -3,18 +3,11 @@ from lsh import bits
 
 
 if __name__ == "__main__":
-    h = bits.Hash(0)
+    h = bits.Hash([True if i < 3 else False for i in range(64)])
+    h.print_data()
+    h.print_working()
+    print(bin(h.get_prefix(5)))
     h.lrotate(1)
-    print(h.get_data())
-    h.rrotate(1)
-    print(h.get_data())
-
-    h = bits.Hash(1)
-    h.lrotate(1)
-    print(h.get_data())
-    h.lrotate(1)
-    print(h.get_data())
-    h.lrotate(1)
-    print(h.get_data())
-    h.rrotate(1)
-    print(h.get_data())
+    h.print_data()
+    h.print_working()
+    print(bin(h.get_prefix(5)))
