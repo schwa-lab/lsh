@@ -3,6 +3,7 @@ Simple hash container with a basic bitwise left rotate operation
 """
 
 include "consts.pxi"
+import random
 
 DEF BITS_IN_CHAR = 8
 
@@ -22,7 +23,6 @@ cdef class Hash:
         cdef unsigned long long i
         cdef unsigned long long index = 0
         cdef unsigned long long slot
-        cdef unsigned long long shifter = 1
         self.data[0] = 0
         self.working[0] = 0
 
@@ -35,11 +35,41 @@ cdef class Hash:
                 self.working[index] = 0
             slot = self.size - slot - 1
             if bit:
-                self.data[index] |= (shifter << slot)
-                self.working[index] |= (shifter << slot)
+                self.data[index] |= (1ULL << slot)
+                self.working[index] |= (1ULL << slot)
             else:
-                self.data[index] &= ~(shifter << slot)
-                self.working[index] &= ~(shifter << slot)
+                self.data[index] &= ~(1ULL << slot)
+                self.working[index] &= ~(1ULL << slot)
+
+    cpdef shuffle(self, randoms):
+        cdef unsigned long long value
+        cdef unsigned long long other_value
+        cdef unsigned int i = 0
+        cdef unsigned int nbits = self.nbits
+        cdef unsigned int slot
+        cdef unsigned int index
+        cdef unsigned int other_slot
+        cdef unsigned int other_index
+        cdef unsigned long long temp
+
+        # XOR bit swap:
+        #   1. Shift bits to swap to LSB
+        #   2. XOR bits to swap together, store in temp
+        #   3. Shift temp back to original positions and XOR with working
+        #      a. if the bits were the same, temp is now 0, and XOR will not do
+        #         anything
+        #      b. if the bits were different, temp is now 1, and XOR will flip
+        #         the original bits
+        while i < nbits:
+            slot = i % self.size
+            index = i // self.size
+            other_slot = randoms[i]
+            other_index = other_slot // self.size
+            other_slot = other_slot % self.size
+            temp = ((self.working[index] >> slot) ^ (self.working[other_index] >> other_slot)) & 1ULL
+            self.working[index] ^= (temp << slot)
+            self.working[other_index] ^= (temp << other_slot)
+            i += 1
 
     cpdef reverse(self, int low, int high):
         cdef unsigned long long left = self.working[low]

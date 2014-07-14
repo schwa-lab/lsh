@@ -50,16 +50,21 @@ class KNNQuery(object):
         neighbours = {}
         candidates = defaultdict(lambda: defaultdict(int))
         start = datetime.now()
+        shuffle = False
         for i, perm in enumerate(self.perms):
             buckets = defaultdict(list)
             prefixes = {}
             if i and i % 100 == 0:
                 print("Processed {} permutations, Total time: {}".format(i, datetime.now() - start))
+                shuffle = not shuffle
+                randoms = [random.randint(i, self.sig_length-1) for i in range(self.sig_length)]
 
             # do the hashing
             for item in self.items:
                 h = item.signature
                 h.lrotate(perm)
+                if shuffle:
+                    h.shuffle(randoms)
                 prefix = h.get_prefix(self.prefix_length)
                 prefixes[item.id] = prefix
                 buckets[prefix].append(item)

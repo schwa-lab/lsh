@@ -85,6 +85,7 @@ def main(args):
     print('bits:{}-perms:{}-prefix:{}-window:{}-k:{} gave recall metric of {} with an average of {} candidates ({} total queries)'.format(args.bits, args.permutations, args.prefix_length, args.window_size, args.k_nearest_neighbours, metric, avg_candidates, max_candidates))
 
 def write_nbits(nbits):
+    """We have to write out the size N to a pxi file for cython to import"""
     with open(NBITS_HEADER, 'w') as f:
         f.write("DEF N = {}\n".format(int(nbits / BASE_SIZE)))
 
