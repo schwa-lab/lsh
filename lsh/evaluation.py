@@ -87,6 +87,8 @@ def main(args):
 
 def write_nbits(nbits):
     """We have to write out the size N to a pxi file for cython to import"""
+    if nbits % BASE_SIZE != 0:
+        raise RuntimeError("bits must be a multiple of {}".format(BASE_SIZE))
     with open(NBITS_HEADER, 'w') as f:
         f.write("DEF N = {}\n".format(int(nbits / BASE_SIZE)))
 
