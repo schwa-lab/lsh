@@ -15,7 +15,7 @@ BASE_SIZE = 64 # size of unsigned long long
 def proportion_correct(neighbours, candidates, k):
     # print('neighbours:{}\tcandidates:{}\n'.format(neighbours, [(x.data, x.working) for x in candidates[0][0].signature.hashes] if candidates else []))
     intersection = set(n[0] for n in neighbours[:k]).intersection(set(c[0].id for c in candidates[:k]))
-    return len(intersection)/k
+    return intersection
 
 def run_queries(args, items, correct=None):
     queries = {}
@@ -76,9 +76,10 @@ def main(args):
 
     total_candidates = 0
     for id in correct_candidates:
-        correct += proportion_correct(correct_candidates[id], queries[id], args.k_nearest_neighbours)
+        intersection = proportion_correct(correct_candidates[id], queries[id], args.k_nearest_neighbours)
+        correct += len(intersection)
         total_candidates += len(queries[id])
-        total += 1
+        total += min(args.k_nearest_neighbours, len(neighbours))
     metric =  correct / total
     max_candidates = len(queries)
     avg_candidates = total_candidates / max_candidates
