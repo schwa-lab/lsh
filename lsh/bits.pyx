@@ -42,10 +42,7 @@ cdef class Hash:
                 self.working[index] &= ~(1ULL << slot)
 
     cpdef shuffle(self, randoms):
-        cdef unsigned long long value
-        cdef unsigned long long other_value
         cdef unsigned int i = 0
-        cdef unsigned int nbits = self.nbits
         cdef unsigned int slot
         cdef unsigned int index
         cdef unsigned int other_slot
@@ -60,7 +57,7 @@ cdef class Hash:
         #         anything
         #      b. if the bits were different, temp is now 1, and XOR will flip
         #         the original bits
-        while i < nbits:
+        while i < self.nbits:
             slot = i % self.size
             index = i // self.size
             other_slot = randoms[i]
