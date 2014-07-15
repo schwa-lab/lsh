@@ -12,7 +12,6 @@ class Projection:
 
     def hash(self, v):
         h = numpy.dot(self.vectors, v)
-        h = [True if x > 0 else False for x in h]
         # h = ''.join('1' if x > 0 else '0' for x in h)
         # h = sum(1 << (len(h) - i - 1) for i, b in enumerate(h) if b > 0)
         # return int(h, 2)

@@ -34,7 +34,7 @@ cdef class Hash:
                 self.data[index] = 0
                 self.working[index] = 0
             slot = self.size - slot - 1
-            if bit:
+            if bit > 0:
                 self.data[index] |= (1ULL << slot)
                 self.working[index] |= (1ULL << slot)
             else:
