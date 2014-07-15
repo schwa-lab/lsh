@@ -94,13 +94,13 @@ class KNNQuery(object):
         nadded = 0
         for item in buckets[query_prefix]:
             if item.id != query_item.id:
-                candidates[item] += 1
+                candidates[item.id] += 1
                 nadded += 1
         prefix_index = 0
         while nadded <= ncandidates and prefix_index < self.prefix_length:
             prefix = query_prefix ^ (1 << prefix_index)
             for item in buckets[prefix]:
-                candidates[item] += 1
+                candidates[item.id] += 1
                 nadded += 1
             prefix_index += 1
 

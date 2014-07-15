@@ -14,14 +14,14 @@ BASE_SIZE = 64 # size of unsigned long long
 
 def proportion_correct(neighbours, candidates, k):
     # print('neighbours:{}\tcandidates:{}\n'.format(neighbours, [(x.data, x.working) for x in candidates[0][0].signature.hashes] if candidates else []))
-    intersection = set(n[0] for n in neighbours[:k]).intersection(set(c[0].id for c in candidates[:k]))
+    intersection = set(n[0] for n in neighbours[:k]).intersection(set(c[0] for c in candidates[:k]))
     return intersection
 
 def run_queries(args, items, correct=None):
     queries = {}
     start = datetime.now()
     print ("Loading NN query")
-    k = KNNQuery(args.permutations, args.bits, args.window_size, int(args.bits/64), args.prefix_length)
+    k = KNNQuery(args.permutations, args.bits, args.window_size, int(args.bits/64), args.prefix_length, args.shuffle_perms, args.reset_before_shuffle)
     print("Done",datetime.now()-start)
     for item in items.values():
         k.add_item_to_index(item)
