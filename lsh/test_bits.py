@@ -4,7 +4,7 @@ from lsh import bits
 
 
 if __name__ == "__main__":
-    h = bits.Hash([True if i < 3 else False for i in range(128)])
+    h = bits.Hash([1 if i < 3 else -1 for i in range(128)])
     print(bits.NBITS())
     h.print_data()
     h.print_working()
