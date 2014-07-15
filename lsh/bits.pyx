@@ -41,6 +41,10 @@ cdef class Hash:
                 self.data[index] &= ~(1ULL << slot)
                 self.working[index] &= ~(1ULL << slot)
 
+    cpdef reset(self):
+        for i in range(N):
+            self.working[i] = self.data[i]
+
     cpdef shuffle(self, randoms):
         cdef unsigned int i = 0
         cdef unsigned int slot

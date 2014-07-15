@@ -36,13 +36,15 @@ def cosine_sim(bow1, bow2):
         return float(dot) / l
 
 class KNNQuery(object):
-    def __init__(self, perm_num, sig_length, window_size, n_hashes, prefix_length):
+    def __init__(self, perm_num, sig_length, window_size, n_hashes, prefix_length, shuffle_perms, reset_before_shuffle):
         self.generate_perms(perm_num, sig_length)
         self.window_size = window_size
         self.items = []
         self.sig_length = sig_length
         self.n_hashes = n_hashes
         self.prefix_length = prefix_length
+        self.shuffle_perms = shuffle_perms
+        self.reset_before_shuffle = reset_before_shuffle
 
     def find_all_neighbours(self, query_item, k, correct=None):
         if correct is None:
@@ -54,10 +56,14 @@ class KNNQuery(object):
         for i, perm in enumerate(self.perms):
             buckets = defaultdict(list)
             prefixes = {}
-            if i and i % 100 == 0:
-                print("Processed {} permutations, Total time: {}".format(i, datetime.now() - start))
-                shuffle = not shuffle
-                randoms = [random.randint(i, self.sig_length-1) for i in range(self.sig_length)]
+            if i:
+                if i % 100 == 0:
+                    print("Processed {} permutations, Total time: {}".format(i, datetime.now() - start))
+                if i % self.shuffle_perms == 0:
+                    shuffle = True
+                    randoms = [random.randint(i, self.sig_length-1) for i in range(self.sig_length)]
+                else:
+                    shuffle = False
 
             # do the hashing
             for item in self.items:
