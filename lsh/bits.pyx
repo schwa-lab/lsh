@@ -88,11 +88,11 @@ cdef class Hash:
         self.reverse(0, N - assign - 1)
         self.reverse(N - assign, N - 1)
 
-    cpdef int bits_in_common(self, other):
+    cpdef int bits_in_common(Hash self, Hash other):
         cdef int common = 0
         cdef unsigned long long x
         for i in range(N):
-            x = ~(self.working[i] ^ other.working[i])
+            x = ~(self.data[i] ^ other.data[i])
             while x:
                 common += 1
                 x &= x-1

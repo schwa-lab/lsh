@@ -80,8 +80,8 @@ class KNNQuery(object):
                 query_prefix = prefixes[item.id]
                 self.add_candidates(buckets, candidates[item.id], item, query_prefix, correct)
 
-        for id in candidates:
-            candidates[id] = sorted(candidates[id].items(), key=itemgetter(1), reverse=True)
+        # for id in candidates:
+        #     candidates[id] = sorted(candidates[id].items(), key=itemgetter(1), reverse=True)
 
         if correct:
             self.print_debug(query_item, candidates, correct)
