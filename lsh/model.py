@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 class LSHItem(object):
-    __slots__ = ('id', 'signature', 'count', 'vector')
-    def __init__(self, id, signature, count=0, vector=None):
+    __slots__ = ('id', 'signature', 'count', 'vector', 'bow')
+    def __init__(self, id, signature, count=0, vector=None, bow=None):
         self.id = id
         self.signature = signature
         self.count = count
@@ -10,6 +10,11 @@ class LSHItem(object):
             self.vector = []
         else:
             self.vector = vector
+
+        if bow is None:
+            self.bow = []
+        else:
+            self.bow = bow
 
     def __str__(self):
         return '{} {}'.format(self.id, self.signature)

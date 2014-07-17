@@ -4,6 +4,7 @@
 Evaluation for LSH v. cosine.
 """
 
+import math
 import argparse
 from datetime import datetime
 from lsh.query import KNNQuery
@@ -12,6 +13,23 @@ import cProfile, pstats, io
 NBITS_HEADER = "consts.pxi"
 BASE_SIZE = 64 # size of unsigned long long
 
+def cosine(bow1, bow2):
+    words = set(bow1).intersection(bow2)
+    dot = sum(bow1[w]*bow2[w] for w in words)
+    l = math.sqrt(sum(x**2 for x in bow1.values()))*math.sqrt(sum(x**2 for x in bow2.values()))
+    if l == 0:
+        return 0
+    else:
+        return float(dot) / l
+
+def run_cosine(queries, items, query_item):
+    s = []
+    for id in queries:
+        sim = cosine(items[id].bow, query_item.bow)
+        s.append((sim, id))
+    s.sort(reverse=True)
+    return s
+
 def proportion_correct(neighbours, candidates, neighbours_k, knn_k):
     # print('neighbours:{}\tcandidates:{}\n'.format(neighbours, [(x.data, x.working) for x in candidates[0][0].signature.hashes] if candidates else []))
     intersection = set(n[0] for n in neighbours[:neighbours_k]).intersection(set(c for c in candidates[:knn_k]))
@@ -19,17 +37,12 @@ def proportion_correct(neighbours, candidates, neighbours_k, knn_k):
 
 def run_queries(args, items, correct=None):
     queries = {}
-    start = datetime.now()
-    print ("Loading NN query")
     k = KNNQuery(args.permutations, args.bits, args.window_size, int(args.bits/64), args.prefix_length, args.shuffle_perms, args.reset_before_shuffle)
-    print("Done",datetime.now()-start)
     for item in items.values():
         k.add_item_to_index(item)
     count = 0
     print("Starting queries")
     queries = k.find_all_neighbours(item, args.knn_k, correct)
-    stop = datetime.now()
-    print('Running queries took {}'.format(stop - start))
     return queries
 
 def sort_queries(queries, items, query_signature):
@@ -47,8 +60,7 @@ def main(args):
         items = list(r.process_file(open(args.json)))
     else:
         items = list(json_to_items(open(args.json)))
-    stop = datetime.now()
-    print('Generating hashes took: {}'.format(stop - start))
+    print('Generating hashes took: {}'.format(datetime.now() - start))
     # map id to item
     items = dict((item.id, item) for item in items)
     correct = 0
@@ -67,7 +79,9 @@ def main(args):
         neighbours = [(int(id), float(cosine)) for id, cosine in neighbours]
         correct_candidates[id] = neighbours
 
+    start = datetime.now()
     queries = run_queries(args, items, correct_candidates if args.debug else None)
+    print('Running queries took {}'.format(datetime.now() - start))
 
     if args.profile:
         pr.disable()
@@ -78,15 +92,29 @@ def main(args):
         print(s.getvalue())
 
     total_candidates = 0
+    print ("Processing candidates")
+    start = datetime.now()
     for id in correct_candidates:
-        intersection = proportion_correct(correct_candidates[id], sort_queries(queries[id], items, items[id].signature), args.neighbours_k, args.knn_k)
+        queries[id] = sort_queries(queries[id], items, items[id].signature)
+        intersection = proportion_correct(correct_candidates[id], queries[id], args.neighbours_k, args.knn_k)
         correct += len(intersection)
         total_candidates += min(len(queries[id]), args.knn_k)
         total += len(neighbours[:args.neighbours_k])
-    metric =  correct / total
+    print('Processing candidates took {}'.format(datetime.now() - start))
+    print ("Running cosine")
+    start = datetime.now()
+    correct_cosine = 0
+    total_cosine = 0
+    for id in correct_candidates:
+        s = run_cosine(queries[id][:args.knn_k], items, items[id])
+        total_cosine += min(args.neighbours_k, len(correct_candidates[id]))
+        correct_cosine += len(set(n[0] for n in correct_candidates[id][:args.neighbours_k]).intersection(set(c[1] for c in s)))
+    print('Running cosine took {}'.format(datetime.now() - start))
+    cosine_metric = correct_cosine / total_cosine * 100
+    metric =  correct / total * 100
     max_candidates = len(queries)
     avg_candidates = total_candidates / max_candidates
-    print('bits:{}-perms:{}-prefix:{}-window:{}-knn-k:{}-neighbours-k:{} gave recall metric of {} with an average of {} candidates ({} total queries)'.format(args.bits, args.permutations, args.prefix_length, args.window_size, args.knn_k, args.neighbours_k, metric, avg_candidates, max_candidates))
+    print('bits:{}-perms:{}-prefix:{}-window:{}-knn-k:{}-neighbours-k:{} gave recall metric of {} with an average of {} candidates ({} total queries): {} total cosine coverage'.format(args.bits, args.permutations, args.prefix_length, args.window_size, args.knn_k, args.neighbours_k, metric, avg_candidates, max_candidates, cosine_metric))
 
 def write_nbits(nbits):
     """We have to write out the size N to a pxi file for cython to import"""
